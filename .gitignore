@@ -1,19 +1,26 @@
 node_modules/
 .expo/
 dist/
+web-build/
+coverage/
 npm-debug.*
+
+# credenciais de assinatura
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
 *.orig.*
-web-build/
 
 # env
 .env
 .env.local
 .env*.local
+
+# nativo (gerado por expo prebuild)
+/ios
+/android
 
 # macOS
 .DS_Store
