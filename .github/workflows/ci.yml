@@ -1,28 +1,44 @@
 name: CI
 
+# Só `push`: com `pull_request` junto, cada commit de uma branch com PR aberto
+# dispararia dois runs completos (o `concurrency` não deduplica entre eventos,
+# porque a chave `github.ref` difere). Os checks aparecem no PR do mesmo jeito.
 on:
   push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
+    branches: ["**"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  typecheck:
-    name: Typecheck
+  quality:
+    name: Lint, Typecheck & Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - name: Set up Node
+        uses: actions/setup-node@v7
         with:
-          node-version: "22"
+          node-version: "24"
           cache: "npm"
 
       - name: Install dependencies
         run: npm ci
 
-      - name: TypeScript check
-        run: npx tsc --noEmit
+      - name: Lint
+        run: npm run lint
 
+      - name: TypeScript check
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test -- --ci
+
+      # Pega incompatibilidade de versão com o SDK que o build local esconde.
       - name: Expo doctor
-        run: npx expo-doctor@latest
+        run: npm run doctor
