@@ -89,4 +89,38 @@ tsconfig.json       # strict mode
 
 ## CI
 
-Job único `quality`: `npm ci` → lint → typecheck → test → `expo-doctor`.
+Job único `quality`: `npm ci` → lint → typecheck → test → `expo-doctor`. Não há job de
+imagem: app mobile faz build via **EAS**, não vai para o cluster (`forge.yaml`:
+`deploy: none`).
+
+O workflow dispara só em `push` (e não em `pull_request`) de propósito — os checks
+aparecem no PR do mesmo jeito, sem rodar dois runs completos por commit.
+
+### Runner: repo privado gerado a partir deste template precisa configurar
+
+Este template é **público**, e em repositório público o GitHub Actions em runner hospedado
+é gratuito. **O repo que você gera a partir dele é privado**, onde os minutos são cota paga
+— e a cota da organização está esgotada. Por isso o `runs-on` é parametrizado por variável
+de repositório, com default hospedado:
+
+```yaml
+runs-on: ${{ fromJSON(vars.CI_RUNNER || '"ubuntu-latest"') }}
+```
+
+Antes do primeiro push no repo novo, defina a variável (Settings → Secrets and variables →
+Actions → Variables), ou por CLI:
+
+```bash
+gh variable set CI_RUNNER --body '["self-hosted","desenrolai"]'
+```
+
+- O valor é **JSON**, não texto solto. `'["self-hosted","desenrolai"]'` vira dois labels;
+  a string `self-hosted,desenrolai` viraria **um** label só, que nenhum runner atende, e o
+  job ficaria em `queued` para sempre.
+- Sem a variável, tudo continua em `ubuntu-latest` — este template continua verde assim.
+- Não há `CI_RUNNER_DOCKER` aqui: sem Dockerfile, não há job de imagem.
+
+**Sintoma de não configurar:** o job morre em ~2 segundos com **`steps: 0`**, sem log de
+erro que oriente. Isso é assinatura de **billing** (cota de Actions esgotada/bloqueada),
+não de YAML quebrado. Não perca tempo procurando erro de sintaxe: confira a variável e o
+billing da organização.
