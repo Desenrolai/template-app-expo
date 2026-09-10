@@ -4,7 +4,7 @@ GitHub Template — base para apps mobile Expo da Desenrolai.
 
 ## Stack
 
-- **Expo SDK 57** (`expo@57.0.19`)
+- **Expo SDK 57** (`expo@57.0.21`)
 - **React Native 0.86.3** e **React 19.2.3** — versões que o SDK 57 pina
 - **TypeScript 6.0.3** em modo `strict`
 - **ESLint 10** com `typescript-eslint` (regras tipadas) e `eslint-plugin-react-hooks`
@@ -93,8 +93,8 @@ Job único `quality`: `npm ci` → lint → typecheck → test → `expo-doctor`
 imagem: app mobile faz build via **EAS**, não vai para o cluster (`forge.yaml`:
 `deploy: none`).
 
-O workflow dispara só em `push` (e não em `pull_request`) de propósito — os checks
-aparecem no PR do mesmo jeito, sem rodar dois runs completos por commit.
+O workflow dispara em `push` na `main` e em `pull_request` para todas as branches.
+Assim, os PRs têm checks sem duplicar runs de push e PR nas branches de trabalho.
 
 ### Runner: repo privado gerado a partir deste template precisa configurar
 
